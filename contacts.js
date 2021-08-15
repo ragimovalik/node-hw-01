@@ -5,7 +5,10 @@ const { nanoid } = require("nanoid");
 
 const contactsPath = path.join(__dirname, "db/contacts.json");
 
-// Function to JSON file reading. @param path
+/* 
+Function to reading JSON file. 
+@param path
+*/
 const fileReading = async (path) => {
   const readFile = await fs.readFile(path);
   const parsedFile = await JSON.parse(readFile);
@@ -33,13 +36,15 @@ async function getContactById(contactId) {
   try {
     const contacts = await fileReading(contactsPath);
 
-    const requiredContact = contacts.find((item) => item.id === contactId);
+    const requiredContact = contacts.find(
+      (item) => item.id.toString() === contactId
+    );
 
     if (!requiredContact) {
       throw new Error("There is no contact with such an ID");
     }
 
-    console.log("Required Contact", requiredContact);
+    console.log("Required contact: ", requiredContact);
 
     return requiredContact;
   } catch (error) {
@@ -55,17 +60,17 @@ async function removeContact(contactId) {
   try {
     const contacts = await fileReading(contactsPath);
 
-    const idx = contacts.findIndex((item) => item.id === contactId);
+    const idx = contacts.findIndex((item) => item.id.toString() === contactId);
 
     if (idx === -1) {
       throw new Error("There is no contact with such ID");
     }
 
     const updatedContacts = contacts.filter((item) => {
-      if (item.id === contactId) {
+      if (item.id.toString() === contactId) {
         console.log(`Contact with ID ${contactId} was successfully deleted`);
       }
-      return item.id !== contactId;
+      return item.id.toString() !== contactId;
     });
 
     const newContacts = await fs.writeFile(
@@ -112,7 +117,7 @@ async function addContact(name, email, phone) {
 
     await fs.writeFile(contactsPath, JSON.stringify(contactsUpdate));
 
-    console.log("New Contact successfully added");
+    console.log("New Contact successfully added: ", newContact);
 
     return newContact;
   } catch (error) {
