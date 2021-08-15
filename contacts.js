@@ -5,13 +5,19 @@ const { nanoid } = require("nanoid");
 
 const contactsPath = path.join(__dirname, "db/contacts.json");
 
+// Function to JSON file reading. @param path
+const fileReading = async (path) => {
+  const readFile = await fs.readFile(path);
+  const parsedFile = await JSON.parse(readFile);
+  return parsedFile;
+};
+
 // Gettin all contacts.
 async function listContacts() {
   try {
-    const contacts = await fs.readFile(contactsPath);
-    const allContacts = await JSON.parse(contacts);
+    const allContacts = await fileReading(contactsPath);
 
-    // console.table(allContacts);
+    console.table(allContacts);
 
     return allContacts;
   } catch (error) {
@@ -19,13 +25,13 @@ async function listContacts() {
   }
 }
 
-/* 
+/*
 Gettin contact by ID. 
 @param {string | number} id.
 */
 async function getContactById(contactId) {
   try {
-    const contacts = await listContacts();
+    const contacts = await fileReading(contactsPath);
 
     const requiredContact = contacts.find((item) => item.id === contactId);
 
@@ -47,17 +53,17 @@ Delete contact by ID. Updating contacts list.
 */
 async function removeContact(contactId) {
   try {
-    const contacts = await listContacts();
+    const contacts = await fileReading(contactsPath);
 
     const idx = contacts.findIndex((item) => item.id === contactId);
 
     if (idx === -1) {
-      throw new Error("There is no contact with such an ID");
+      throw new Error("There is no contact with such ID");
     }
 
     const updatedContacts = contacts.filter((item) => {
       if (item.id === contactId) {
-        console.log(`Contact with ID ${contactId} was deleted`);
+        console.log(`Contact with ID ${contactId} was successfully deleted`);
       }
       return item.id !== contactId;
     });
@@ -79,10 +85,15 @@ Adding contact. Updating contacts list.
 @param {string} email.
 @param {string} phone.
 */
-
 async function addContact(name, email, phone) {
   try {
-    const contacts = await listContacts();
+    if (!name || !email || !phone) {
+      throw new Error(
+        "Please check your data. Name, email, phone are required"
+      );
+    }
+
+    const contacts = await fileReading(contactsPath);
 
     contacts.find((item) => {
       if (item.name === name || item.email === email || item.phone === phone) {

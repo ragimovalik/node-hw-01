@@ -1,29 +1,41 @@
+const { Command } = require("commander");
+const program = new Command();
+
 const contactsOperations = require("./contacts");
 
-(async function () {
-  try {
-    const contactAdd = await contactsOperations.addContact(
-      "Robert",
-      "rob@com.us",
-      "(555) 789-2266"
-    );
-    // console.log(contactAdd);
+program
+  .option("-a, --action <type>", "choose action")
+  .option("-i, --id <type>", "user id")
+  .option("-n, --name <type>", "user name")
+  .option("-e, --email <type>", "user email")
+  .option("-p, --phone <type>", "user phone");
 
-    const allContacts = await contactsOperations.listContacts();
-    console.table(allContacts);
+program.parse(process.argv);
 
-    const contactRemove = await contactsOperations.removeContact("F9EOSL");
-    // console.log(contactRemove);
+const argv = program.opts();
 
-    const contactGetOne = await contactsOperations.getContactById(3);
-    // console.log(contactGetOne);
-  } catch (error) {
-    console.log("Error info: ", error.message);
+// TODO: рефакторить
+function invokeAction({ action, id, name, email, phone }) {
+  switch (action) {
+    case "list":
+      await contactsOperations.listContacts();
+      break;
+
+    case "get":
+      await contactsOperations.getContactById(id);
+      break;
+
+    case "add":
+      await contactsOperations.addContact(name, email, phone);
+      break;
+
+    case "remove":
+      await contactsOperations.removeContact(id);
+      break;
+
+    default:
+      console.warn("\x1B[31m Unknown action type!");
   }
-})();
+}
 
-// contactsOperations.removeContact(5);
-
-// contactsOperations.getContactById(2);
-
-// console.log(contactsOperations.listContacts());
+invokeAction(argv);
